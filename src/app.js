@@ -29,14 +29,20 @@ const thirdQuestion = [
     {type: "list", 
     name: "options", 
     message: "what would you like to do?", 
-    choices: ["view orders", "order again", "leave"]}
+    choices: ["view orders", "order again", "collect", "leave"]}
 ];
 
-// const collectQuestion = [
-//     {type: "input",  
-//     name:"options",
-//     message: "which coffee would you like to collect?"}
-// ];
+const collectQuestionType = [
+    {type: "input",  
+    name:"options",
+    message: "which type of coffee would you like to collect?"}
+];
+
+const collectQuestionSize = [
+    {type: "input",  
+    name:"options",
+    message: "what size?"}
+];
 
 //Make the figlet text show up before anything else runs
 const main = () => {
@@ -74,11 +80,13 @@ const app = async () => {
             const showOrders = await Order.find({});
             console.log(showOrders);
             connection.close();
+        }else if(response.options == "collect"){
+            const answer = await inquirer.prompt(collectQuestionType)
+            const answers = await inquirer.prompt(collectQuestionSize)
+            await Order.deleteOne({coffee:`${answer.options}`, size:`${answers.options}`});
+            const showOrders = await Order.find({});
+            console.log(showOrders);
             // if leave option is chosen, say bye and end the application
-        // }else if(response.options == "collect coffee"){
-        //     myCoffee= await inquirer.prompt(collectQuestion);
-        //     deleteMe= JSON.stringify(myCoffee.options);
-        //     Order.deleteOne({coffee: deleteMe})
         }else if(response.options == "leave"){
             console.log("Bye!")
             connection.close();

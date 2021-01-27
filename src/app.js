@@ -2,8 +2,11 @@
 const inquirer = require("inquirer");
 const figlet = require("figlet");
 const chalk = require("chalk");
+require("./db/connection")
 //Import modules from coffee.js
-const {listOrder, addOrder, collectCoffee} = require ("../utils/coffees")
+// const {listOrder, addOrder, collectCoffee} = require ("../utils/coffees");
+const { Order } = require("./db/models/Order");
+const { connection } = require("mongoose");
 
 // Set first question to be asked
 const firstQuestion = [
@@ -29,6 +32,11 @@ const thirdQuestion = [
     choices: ["view orders", "order again", "leave"]}
 ];
 
+// const collectQuestion = [
+//     {type: "input",  
+//     name:"options",
+//     message: "which coffee would you like to collect?"}
+// ];
 
 //Make the figlet text show up before anything else runs
 const main = () => {
@@ -48,7 +56,12 @@ const app = async () => {
         //depending on the answer, console log the choice made
         console.log(`You picked a ${answer.options} ${answers.options} `)
         //run the addOrder function, passing in the answers to the 2 questions asked.
-        addOrder(answers.options, answer.options)
+        // addOrder(answers.options, answer.options) <-- USED BEFORE MONGO INTEGRATION
+        const order = new Order({
+            coffee: answers.options,
+            size: answer.options,
+        });
+        await order.save();
         //await the answer to the third question
         const response = await inquirer.prompt(thirdQuestion);
         //if order again is selected, rerun the app function
@@ -57,10 +70,18 @@ const app = async () => {
             //if view orders is selected, list the orders
         }else if(response.options == "view orders"){
             console.log("Here are your orders")
-            listOrder()
+            // listOrder() <-- USED BEFORE MONGO INTEGRATION
+            const showOrders = await Order.find({});
+            console.log(showOrders);
+            connection.close();
             // if leave option is chosen, say bye and end the application
+        // }else if(response.options == "collect coffee"){
+        //     myCoffee= await inquirer.prompt(collectQuestion);
+        //     deleteMe= JSON.stringify(myCoffee.options);
+        //     Order.deleteOne({coffee: deleteMe})
         }else if(response.options == "leave"){
             console.log("Bye!")
+            connection.close();
         };
 
     };
